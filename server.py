@@ -57,13 +57,20 @@ def _modal_dispatch(payload: dict, image_id: str) -> dict:
     if not MODAL_ENDPOINT_URL:
         raise RuntimeError("MODAL_ENDPOINT_URL is not set.")
 
-    logger.info(f"[{image_id}] Dispatching to Modal: {MODAL_ENDPOINT_URL}")
+    logger.info(f"[{image_id}] Dispatching to Modal: {MODAL_ENDPOINT_URL}/infer")
     resp = requests.post(
         f"{MODAL_ENDPOINT_URL}/infer",
         json=payload,
         timeout=120,   # T4 cold-start ~30s; BLIP inference ~1s once warm
     )
-    resp.raise_for_status()
+    if not resp.ok:
+        # Surface validation errors (422) clearly in logs
+        try:
+            detail = resp.json()
+        except Exception:
+            detail = resp.text[:500]
+        logger.error(f"[{image_id}] Modal {resp.status_code}: {detail}")
+        resp.raise_for_status()
     return resp.json()
 
 
