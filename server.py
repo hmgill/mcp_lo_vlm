@@ -132,6 +132,7 @@ async def caption_oct(
     image_id:   str,
     max_length: int = DEFAULT_MAX_LENGTH,
     num_beams:  int = DEFAULT_NUM_BEAMS,
+    prompt:     str = "",
 ) -> str:
     """
     Generate a retinal layer-level narrative caption from an OCT B-scan.
@@ -178,6 +179,7 @@ async def caption_oct(
             "model":      "base",
             "max_length": max_length,
             "num_beams":  num_beams,
+            "prompt":     prompt,
         }
 
         result = _modal_dispatch(payload, image_id)
